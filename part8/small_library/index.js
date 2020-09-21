@@ -4,10 +4,11 @@ const {
   gql,
   UserInputError,
   AuthenticationError,
+  PubSub,
 } = require('apollo-server');
-const { v1: uuid } = require('uuid');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
+const DataLoader = require('dataloader');
 const Book = require('./models/book');
 const Author = require('./models/author');
 const User = require('./models/user');
@@ -25,12 +26,13 @@ mongoose
     console.log('error connecting to MongoDB:', error.message);
   });
 
-//TODO: why won't allBooks or addBook output Author info?...
+const pubsub = new PubSub();
+
 const typeDefs = gql`
   type User {
     username: String!
     favoriteGenre: String!
-    id: ID!
+    _id: ID!
   }
 
   type Token {
@@ -42,12 +44,12 @@ const typeDefs = gql`
     published: Int!
     author: Author!
     genres: [String!]!
-    id: ID!
+    _id: ID!
   }
 
   type Author {
     name: String!
-    id: ID!
+    _id: ID!
     born: Int
     bookCount: Int
   }
@@ -71,6 +73,10 @@ const typeDefs = gql`
     createUser(username: String!, favoriteGenre: String!): User
     login(username: String!, password: String!): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `;
 
 const resolvers = {
@@ -93,16 +99,20 @@ const resolvers = {
     },
 
     allAuthors: () => Author.find({}),
-
     me: (root, args, context) => {
       return context.currentUser;
     },
   },
 
   Author: {
-    bookCount: async root => {
-      const books = await Book.find({ author: root._id });
-      return books.length;
+    bookCount: async (root, args, { loaders }) =>
+      await loaders.bookCount.load(root._id),
+  },
+
+  Book: {
+    author: async root => {
+      const author = await Author.findOne({ _id: root.author });
+      return author;
     },
   },
 
@@ -115,7 +125,6 @@ const resolvers = {
 
       let author = await Author.findOne({ name: args.author });
       if (!author) {
-        console.log('creating new author', args.author);
         const newAuthor = new Author({
           name: args.author,
         });
@@ -129,11 +138,8 @@ const resolvers = {
       }
 
       author = await Author.findOne({ name: args.author });
-      console.log('author:', author);
-      console.log('args:', args);
       const book = new Book({ ...args });
       book.author = author;
-      console.log('book:', book);
       try {
         await book.save();
       } catch (error) {
@@ -141,6 +147,7 @@ const resolvers = {
           invalidArgs: args,
         });
       }
+      pubsub.publish('BOOK_ADDED', { bookAdded: book });
       return book;
     },
 
@@ -196,7 +203,22 @@ const resolvers = {
       return { value: jwt.sign(userForToken, JWT_SECRET) };
     },
   },
+
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator(['BOOK_ADDED']),
+    },
+  },
 };
+
+const batchBookCount = async keys => {
+  const books = await Book.find({ author: { $in: keys } });
+  return keys.map(
+    key => books.filter(b => String(b.author) === String(key)).length,
+  );
+};
+
+const bookCountLoader = new DataLoader(keys => batchBookCount(keys));
 
 const server = new ApolloServer({
   typeDefs,
@@ -206,7 +228,12 @@ const server = new ApolloServer({
     if (auth && auth.toLowerCase().startsWith('bearer ')) {
       const decodedToken = jwt.verify(auth.substring(7), JWT_SECRET);
       const currentUser = await User.findById(decodedToken.id);
-      return { currentUser };
+      return {
+        currentUser,
+        loaders: {
+          bookCount: bookCountLoader,
+        },
+      };
     }
   },
 });

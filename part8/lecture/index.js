@@ -4,6 +4,7 @@ const {
   UserInputError,
   gql,
   AuthenticationError,
+  PubSub,
 } = require('apollo-server');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
@@ -17,6 +18,8 @@ mongoose.set('useFindAndModify', false);
 const MONGODB_URI = process.env.MONGODB_URI;
 
 console.log('connecting to', MONGODB_URI);
+
+const pubsub = new PubSub();
 
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true })
@@ -42,6 +45,7 @@ const typeDefs = gql`
     name: String!
     phone: String
     address: Address!
+    friendOf: [User!]!
     id: ID!
   }
 
@@ -74,6 +78,10 @@ const typeDefs = gql`
     login(username: String!, password: String!): Token
     addAsFriend(name: String!): User
   }
+
+  type Subscription {
+    personAdded: Person!
+  }
 `;
 
 const resolvers = {
@@ -81,10 +89,12 @@ const resolvers = {
     personCount: () => Person.collection.countDocuments(),
     allPersons: (root, args) => {
       if (!args.phone) {
-        return Person.find({});
+        return Person.find({}).populate('friendOf');
       }
 
-      return Person.find({ phone: { $exists: args.phone === 'YES' } });
+      return Person.find({ phone: { $exists: args.phone === 'YES' } }).populate(
+        'friendOf',
+      );
     },
     findPerson: (root, args) => Person.findOne({ name: args.name }),
     me: (root, args, context) => {
@@ -117,6 +127,7 @@ const resolvers = {
           invalidArgs: args,
         });
       }
+      pubsub.publish('PERSON_ADDED', { personAdded: person });
       return person;
     },
     editNumber: async (root, args) => {
@@ -171,6 +182,12 @@ const resolvers = {
       return currentUser;
     },
   },
+
+  Subscription: {
+    personAdded: {
+      subscribe: () => pubsub.asyncIterator(['PERSON_ADDED']),
+    },
+  },
 };
 
 const server = new ApolloServer({
@@ -188,6 +205,7 @@ const server = new ApolloServer({
   },
 });
 
-server.listen().then(({ url }) => {
+server.listen().then(({ url, subscriptionsUrl }) => {
   console.log(`Server ready at ${url}`);
+  console.log(`Subscriptions ready at ${subscriptionsUrl}`);
 });

@@ -6,7 +6,11 @@ const PhoneForm = ({ setError }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
 
-  const [changeNumber, result] = useMutation(EDIT_NUMBER);
+  const [changeNumber, result] = useMutation(EDIT_NUMBER, {
+    onError: err => {
+      setError(err.graphQLErrors[0].message);
+    },
+  });
 
   const submit = e => {
     e.preventDefault();
