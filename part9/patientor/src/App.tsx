@@ -8,12 +8,12 @@ import { useStateValue, setPatientList } from './state';
 import { Patient } from './types';
 
 import PatientListPage from './PatientListPage';
-import PatientInfo from './components/PatientInfo';
+import PatientInfo from './PatientInfo';
 
 const App: React.FC = () => {
   const [, dispatch] = useStateValue();
   React.useEffect(() => {
-    axios.get<void>(`${apiBaseUrl}/ping`);
+    // axios.get<void>(`${apiBaseUrl}/ping`);
 
     const fetchPatientList = async () => {
       try {

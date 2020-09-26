@@ -2,14 +2,17 @@
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { NewPatient, Gender } from './types';
+import { NewPatient, Gender, Entry, EntryTypes } from './types';
 
 const isString = (text: any): text is string => {
   return typeof text === 'string' || text instanceof String;
 };
 
-const isArrayOfStrings = (arr: any): arr is Array<string> => {
-  return Array.isArray(arr) && arr.every(a => isString(a));
+const isEntryType = (arr: any): arr is Array<Entry> => {
+  return (
+    Array.isArray(arr) &&
+    arr.every(a => Object.values(EntryTypes).includes(a.type))
+  );
 };
 
 const isDate = (date: string): boolean => {
@@ -60,8 +63,8 @@ const parseOccupation = (occupation: any): string => {
   return occupation;
 };
 
-const parseEntries = (entries: any): Array<string> => {
-  if (!entries || !isArrayOfStrings(entries)) {
+const parseEntries = (entries: any): Array<Entry> => {
+  if (!entries || !isEntryType(entries)) {
     throw new Error(`Incorrect or missing entries: ${entries}`);
   }
   return entries;

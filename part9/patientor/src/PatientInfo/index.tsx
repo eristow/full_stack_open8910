@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { Icon } from 'semantic-ui-react';
 
+import EntryDetails from './EntryDetails';
 import { apiBaseUrl } from '../constants';
 import { Patient } from '../types';
 import { useStateValue, addPatientSensitive } from '../state';
@@ -30,6 +31,7 @@ const PatientInfo: React.FC = () => {
     };
     fetchPatientDetails();
   }, [id]); // eslint-disable-line
+
 
   if (!patientDetails) {
     return <p>loading...</p>;
@@ -63,6 +65,10 @@ const PatientInfo: React.FC = () => {
       {patientDetails.dateOfBirth && (
         <p>Date of birth: {patientDetails.dateOfBirth}</p>
       )}
+      <h3>Entries</h3>
+      {patientDetails.entries.map(e => (
+        <EntryDetails key={e.id} entry={e} />
+      ))}
     </div>
   );
 };
