@@ -1,9 +1,6 @@
 import React from 'react';
-
-type CoursePart = {
-  name: string;
-  exerciseCount: number;
-};
+import { CoursePart } from '../types';
+import Part from './part';
 
 interface Props {
   contents: Array<CoursePart>;
@@ -13,9 +10,12 @@ const Content: React.FC<Props> = ({ contents }) => {
   return (
     <>
       {contents.map(content => (
-        <p key={content.name}>
-          {content.name}: {content.exerciseCount}
-        </p>
+        <div key={content.name}>
+          <h2>
+            {content.name}: {content.exerciseCount}
+          </h2>
+          <Part part={content} />
+        </div>
       ))}
     </>
   );

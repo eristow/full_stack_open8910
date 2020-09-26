@@ -8,6 +8,10 @@ const isString = (text: any): text is string => {
   return typeof text === 'string' || text instanceof String;
 };
 
+const isArrayOfStrings = (arr: any): arr is Array<string> => {
+  return Array.isArray(arr) && arr.every(a => isString(a));
+};
+
 const isDate = (date: string): boolean => {
   return Boolean(Date.parse(date));
 };
@@ -56,6 +60,13 @@ const parseOccupation = (occupation: any): string => {
   return occupation;
 };
 
+const parseEntries = (entries: any): Array<string> => {
+  if (!entries || !isArrayOfStrings(entries)) {
+    throw new Error(`Incorrect or missing entries: ${entries}`);
+  }
+  return entries;
+};
+
 const toNewPatient = (object: any): NewPatient => {
   const newPatient: NewPatient = {
     name: parseName(object.name),
@@ -63,6 +74,7 @@ const toNewPatient = (object: any): NewPatient => {
     ssn: parseSsn(object.ssn),
     gender: parseGender(object.gender),
     occupation: parseOccupation(object.occupation),
+    entries: parseEntries(object.entries),
   };
 
   return newPatient;
