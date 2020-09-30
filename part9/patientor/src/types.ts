@@ -27,6 +27,7 @@ export interface Patient {
 }
 
 interface BaseEntry {
+  type: EntryTypes;
   id: string;
   description: string;
   date: string;
@@ -77,3 +78,12 @@ export type Entry =
   | HospitalEntry
   | OccupationalHealthcareEntry
   | HealthCheckEntry;
+
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+type DistributiveOmit<T, K extends keyof any> = T extends any
+  ? Omit<T, K>
+  : never;
+
+export type NewBaseEntry = Omit<BaseEntry, 'id'>;
+
+export type NewEntry = DistributiveOmit<Entry, 'id'>;

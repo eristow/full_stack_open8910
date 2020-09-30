@@ -1,6 +1,6 @@
 import express from 'express';
 import patientService from '../services/patientService';
-import toNewPatient from '../utils';
+import { toNewPatient, toNewEntry } from '../utils';
 
 const router = express.Router();
 
@@ -26,6 +26,23 @@ router.post('/', (req, res) => {
   } catch (e) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     res.status(400).send(e.message);
+  }
+});
+
+router.post('/:id/entries', (req, res) => {
+  const patient = patientService.findById(req.params.id);
+
+  if (patient) {
+    try {
+      const newEntry = toNewEntry(req.body);
+      const updatedPatient = patientService.addEntry(patient, newEntry);
+      res.json(updatedPatient);
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      res.status(400).send({ error: e.message }); // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+    }
+  } else {
+    res.status(404).send({ error: 'Patient does not exist' });
   }
 });
 

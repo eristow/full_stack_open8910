@@ -1,41 +1,65 @@
+import { v1 as uuid } from 'uuid';
 import patients from '../../data/patients';
-import { Patient, NewPatient, PublicPatient } from '../types';
+import {
+  Patient,
+  NewPatient,
+  Entry,
+  NewEntry,
+  NonSensitivePatient,
+} from '../types';
 
-const getPatients = (): Array<Patient> => {
-  return patients;
-};
+let savedPatients = [...patients];
 
-const getNonSensitivePatients = (): PublicPatient[] => {
-  return patients.map(({ id, name, dateOfBirth, gender, occupation }) => ({
-    id,
-    name,
-    dateOfBirth,
-    gender,
-    occupation,
-  }));
+const getNonSensitivePatients = (): NonSensitivePatient[] => {
+  return savedPatients.map(
+    ({ id, name, dateOfBirth, gender, occupation, entries }) => ({
+      id,
+      name,
+      dateOfBirth,
+      gender,
+      occupation,
+      entries,
+    }),
+  );
 };
 
 const addPatient = (patient: NewPatient): Patient => {
-  const newId = `d277${String(
-    Math.floor(1000 + Math.random() * 9000),
-  )}-f723-11e9-8f0b-362b9e155667`;
+  const newId = uuid();
   const newPatient = {
     id: newId,
     ...patient,
+    entries: [] as Entry[],
   };
 
-  patients.push(newPatient);
+  savedPatients = savedPatients.concat(newPatient);
   return newPatient;
 };
 
 const findById = (id: string): Patient | undefined => {
-  const patient = patients.find(p => p.id === id);
+  const patient = savedPatients.find(p => p.id === id);
   return patient;
 };
 
+const addEntry = (patient: Patient, entry: NewEntry): Patient => {
+  const newEntry: Entry = {
+    id: uuid(),
+    ...entry,
+  };
+  const updatedPatient = {
+    ...patient,
+    entries: patient.entries.concat(newEntry),
+  };
+
+  savedPatients = savedPatients.map(p =>
+    p.id === updatedPatient.id ? updatedPatient : p,
+  );
+
+  return updatedPatient;
+};
+
 export default {
-  getPatients,
   getNonSensitivePatients,
   addPatient,
   findById,
+  addEntry,
 };
