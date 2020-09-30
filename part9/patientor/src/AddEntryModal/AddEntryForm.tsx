@@ -2,11 +2,13 @@ import React from 'react';
 import { Grid, Button } from 'semantic-ui-react';
 import { Field, Formik, Form, FormikHelpers } from 'formik';
 import * as yup from 'yup';
+import axios from 'axios';
 
-import { NewEntry } from '../types';
+import { Diagnosis, NewEntry } from '../types';
 import { DiagnosisSelection, TextField } from '../AddPatientModal/FormField';
-import { useStateValue } from '../state';
+import { setDiagnoses, useStateValue } from '../state';
 import EntryTypeForms from './EntryTypeForms';
+import { apiBaseUrl } from '../constants';
 
 interface Props {
   onSubmit: (values: NewEntry, actions: FormikHelpers<NewEntry>) => void;
@@ -19,9 +21,24 @@ const AddEntryForm: React.FC<Props> = ({
   onSubmit,
   onCancel,
   initialValues,
-  validationSchema
+  validationSchema,
 }) => {
-  const [{ diagnoses }] = useStateValue();
+  const [{ diagnoses }, dispatch] = useStateValue();
+  React.useEffect(() => {
+    const fetchDiagnoses = async () => {
+      try {
+        if (diagnoses.length === 0) {
+          const { data: diagnosesFromApi } = await axios.get<Array<Diagnosis>>(
+            `${apiBaseUrl}/diagnoses`,
+          );
+          dispatch(setDiagnoses(diagnosesFromApi));
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+    fetchDiagnoses();
+  }, []); // eslint-disable-line
 
   return (
     <Formik
