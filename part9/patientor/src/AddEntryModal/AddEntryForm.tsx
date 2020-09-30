@@ -12,14 +12,14 @@ interface Props {
   onSubmit: (values: NewEntry, actions: FormikHelpers<NewEntry>) => void;
   onCancel: () => void;
   initialValues: NewEntry;
-  // validationSchema: yup.ObjectSchema;
+  validationSchema: yup.ObjectSchema;
 }
 
 const AddEntryForm: React.FC<Props> = ({
   onSubmit,
   onCancel,
   initialValues,
-  // validationSchema
+  validationSchema
 }) => {
   const [{ diagnoses }] = useStateValue();
 
@@ -27,26 +27,8 @@ const AddEntryForm: React.FC<Props> = ({
     <Formik
       initialValues={initialValues}
       onSubmit={onSubmit}
-      validate={values => {
-        const requiredError = 'Field is required';
-        const re = /^\d{4}-\d{1,2}-\d{1,2}$/;
-        const errors: { [field: string]: string } = {};
-        if (!values.description) {
-          errors.description = requiredError;
-        }
-        if (!values.date) {
-          errors.date = requiredError;
-        }
-        if (re.exec(values.date) === null) {
-          errors.date = 'Date must be fomatted in YYYY-MM-DD.';
-        }
-        if (!values.specialist) {
-          errors.specialist = requiredError;
-        }
-        return errors;
-      }}
       enableReinitialize
-      // validationSchema={validationSchema}
+      validationSchema={validationSchema}
     >
       {({ isValid, dirty, setFieldValue, setFieldTouched, values }) => {
         return (
@@ -69,7 +51,6 @@ const AddEntryForm: React.FC<Props> = ({
               name="specialist"
               component={TextField}
             />
-            {/* TODO: clear diagnosis selections onSubmit or onClick clear button */}
             <DiagnosisSelection
               setFieldValue={setFieldValue}
               setFieldTouched={setFieldTouched}

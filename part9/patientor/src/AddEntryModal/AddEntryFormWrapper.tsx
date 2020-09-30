@@ -9,45 +9,45 @@ import AddEntryForm from './AddEntryForm';
 const dateRegex = /^\d{4}-\d{1,2}-\d{1,2}$/;
 const dateErrorMessage = 'Date must be formatted as YYYY-MM-DD';
 
-// const baseSchema = yup.object().shape({
-//   description: yup.string().min(10).required(),
-//   date: yup.string().matches(dateRegex, dateErrorMessage),
-//   specialist: yup.string().min(6).required(),
-//   diagnosisCodes: yup.array().of(yup.string()),
-// });
+const baseSchema: yup.ObjectSchema = yup.object().shape({
+  description: yup.string().min(10).required(),
+  date: yup.string().matches(dateRegex, dateErrorMessage),
+  specialist: yup.string().min(6).required(),
+  diagnosisCodes: yup.array().of(yup.string()),
+});
 
-// const healthCheckSchema = baseSchema.concat(
-//   yup.object().shape({
-//     healthCheckRating: yup
-//       .number()
-//       .typeError('Health check rating must be a number')
-//       .min(0)
-//       .max(3)
-//       .required('Enter a rating from 0 (healthy) to 3 (critical)'),
-//   }),
-// );
+const healthCheckSchema = baseSchema.concat(
+  yup.object().shape({
+    healthCheckRating: yup
+      .number()
+      .typeError('Health check rating must be a number')
+      .min(0)
+      .max(3)
+      .required('Enter a rating from 0 (healthy) to 3 (critical)'),
+  }),
+);
 
-// const occupationalSchema = baseSchema.concat(
-//   yup.object().shape({
-//     employerName: yup.string().min(3).required(),
-//     sickLeave: yup.object().shape({
-//       startDate: yup.string().matches(dateRegex, dateErrorMessage),
-//       endDate: yup.string().matches(dateRegex, dateErrorMessage),
-//     }),
-//   }),
-// );
+const occupationalSchema = baseSchema.concat(
+  yup.object().shape({
+    employerName: yup.string().min(3).required(),
+    sickLeave: yup.object().shape({
+      startDate: yup.string().matches(dateRegex, dateErrorMessage),
+      endDate: yup.string().matches(dateRegex, dateErrorMessage),
+    }),
+  }),
+);
 
-// const hospitalSchema = baseSchema.concat(
-//   yup.object().shape({
-//     discharge: yup.object({
-//       date: yup
-//         .string()
-//         .matches(dateRegex, dateErrorMessage)
-//         .required('Enter a discharge date'),
-//       criteria: yup.string().min(10).required('Enter a discharge criteria'),
-//     }),
-//   }),
-// );
+const hospitalSchema = baseSchema.concat(
+  yup.object().shape({
+    discharge: yup.object({
+      date: yup
+        .string()
+        .matches(dateRegex, dateErrorMessage)
+        .required('Enter a discharge date'),
+      criteria: yup.string().min(10).required('Enter a discharge criteria'),
+    }),
+  }),
+);
 
 const baseInitialValues = {
   description: '',
@@ -116,7 +116,7 @@ const AddEntryFormWrapper: React.FC<Props> = ({ onSubmit, onCancel }) => {
             onSubmit={onSubmit}
             onCancel={onCancel}
             initialValues={healthCheckInitialValues}
-            // validationSchema={healthCheckSchema}
+            validationSchema={healthCheckSchema}
           />
         );
       case EntryTypes.Hospital:
@@ -125,7 +125,7 @@ const AddEntryFormWrapper: React.FC<Props> = ({ onSubmit, onCancel }) => {
             onSubmit={onSubmit}
             onCancel={onCancel}
             initialValues={hospitalInitialValues}
-            // validationSchema={hospitalSchema}
+            validationSchema={hospitalSchema}
           />
         );
       case EntryTypes.OccupationalHealthcare:
@@ -134,7 +134,7 @@ const AddEntryFormWrapper: React.FC<Props> = ({ onSubmit, onCancel }) => {
             onSubmit={onSubmit}
             onCancel={onCancel}
             initialValues={occupationalInitialValues}
-            // validationSchema={occupationalSchema}
+            validationSchema={occupationalSchema}
           />
         );
       default:

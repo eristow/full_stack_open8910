@@ -65,12 +65,12 @@ const PatientInfo: React.FC = () => {
 
   const submitNewEntry = async (values: NewEntry) => {
     try {
-      setError(undefined);
       const { data: updatedPatient } = await axios.post<Patient>(
         `${apiBaseUrl}/patients/${id}/entries`,
         { ...values },
       );
       dispatch(addEntry(updatedPatient));
+      closeModal();
     } catch (e) {
       console.error(e.response.data);
       setError(e.response.data.error);
