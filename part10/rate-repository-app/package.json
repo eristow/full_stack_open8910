@@ -9,23 +9,33 @@
     "lint": "eslint ./src/**/*.{js,jsx} App.js --no-error-on-unmatched-pattern"
   },
   "dependencies": {
+    "@apollo/react-hooks": "^4.0.0",
+    "apollo-boost": "^0.4.9",
+    "dotenv": "^8.2.0",
     "expo": "~38.0.8",
     "expo-status-bar": "^1.0.2",
     "formik": "^2.1.7",
+    "graphql": "^15.3.0",
     "react": "~16.11.0",
     "react-dom": "~16.11.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-38.0.2.tar.gz",
     "react-native-web": "~0.11.7",
     "react-router-native": "^5.2.0",
-    "yup": "^0.29.3"
+    "yup": "^0.29.3",
+    "@react-native-community/async-storage": "~1.11.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.6",
     "@expo/webpack-config": "^0.12.37",
+    "@testing-library/jest-native": "^3.4.3",
+    "@testing-library/react-native": "^7.0.2",
     "babel-eslint": "^10.1.0",
     "babel-preset-expo": "~8.1.0",
     "eslint": "^7.10.0",
-    "eslint-plugin-react": "^7.21.2"
+    "eslint-plugin-jest": "^24.0.2",
+    "eslint-plugin-react": "^7.21.2",
+    "jest": "^26.5.0",
+    "jest-expo": "^39.0.0"
   },
   "private": true
 }
