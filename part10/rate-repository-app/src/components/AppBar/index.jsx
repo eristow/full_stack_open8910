@@ -1,13 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Constants from 'expo-constants';
-import { useQuery } from '@apollo/react-hooks';
 
 import theme from '../../theme';
 import AppBarTab from './AppBarTab';
 import SignOutTab from './SignOutTab';
-import Text from '../Text';
-import { GET_AUTHORIZED_USER } from '../../graphql/queries';
+import useGetAuthorizedUser from '../../hooks/useGetAuthorizedUser';
 
 const styles = StyleSheet.create({
   container: {
@@ -23,25 +21,23 @@ const styles = StyleSheet.create({
 });
 
 const AppBar = () => {
-  const { data, error, loading } = useQuery(GET_AUTHORIZED_USER, {
-    fetchPolicy: 'cache-and-network',
-  });
-
-  if (loading) {
-    return <Text>Loading...</Text>;
-  }
-  if (error) {
-    return <Text>{`Error! ${error.message}`}</Text>;
-  }
+  const { user } = useGetAuthorizedUser();
 
   return (
     <View style={styles.container}>
       <ScrollView horizontal contentContainerStyle={styles.scrollView}>
         <AppBarTab text="Repositories" url="/" />
-        {data.authorizedUser === null ? (
-          <AppBarTab text="Sign In" url="/signin" />
+        {user === null ? (
+          <>
+            <AppBarTab text="Sign In" url="/signin" />
+            <AppBarTab text="Sign Up" url="/signup" />
+          </>
         ) : (
-          <SignOutTab />
+          <>
+            <AppBarTab text="Create A Review" url="/createReview" />
+            <AppBarTab text="My Reviews" url="/userReviews" />
+            <SignOutTab />
+          </>
         )}
         {/* <AppBarTab text="BMI" url="/bmi" /> */}
       </ScrollView>

@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import {
+  Linking,
+  TouchableWithoutFeedback,
+  View,
+  StyleSheet,
+  Image,
+} from 'react-native';
 
 import theme from '../../theme';
 import Text from '../Text';
@@ -10,11 +16,23 @@ const styles = StyleSheet.create({
     display: 'flex',
     padding: 10,
   },
-  header: {},
   image: {
     width: 50,
     height: 50,
     borderRadius: 5,
+  },
+  ghButton: {
+    marginTop: 15,
+    marginHorizontal: 10,
+    padding: 20,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 3,
+  },
+  ghButtonText: {
+    textAlign: 'center',
+  },
+  containerDetailsView: {
+    marginBottom: 10,
   },
 });
 
@@ -44,13 +62,11 @@ const itemHeaderStyles = StyleSheet.create({
   },
   languageContainer: {
     marginTop: 5,
-    padding: 5,
+    paddingVertical: 5,
+    paddingHorizontal: 7,
     backgroundColor: theme.colors.primary,
     borderRadius: 3,
     alignSelf: 'flex-start',
-  },
-  language: {
-    color: theme.colors.white,
   },
 });
 
@@ -61,12 +77,16 @@ const ItemHeader = ({ avatarUrl, repoName, description, language }) => {
         <Image style={itemHeaderStyles.avatar} source={{ uri: avatarUrl }} />
       </View>
       <View style={itemHeaderStyles.infoContainer}>
-        <Text fontWeight="bold" fontSize="subheading">
+        <Text fontWeight="bold" fontSize="subheading" testID="titleText">
           {repoName}
         </Text>
-        <Text color="textSecondary">{description}</Text>
+        <Text color="textSecondary" fontSize="subheading2">
+          {description}
+        </Text>
         <View style={itemHeaderStyles.languageContainer}>
-          <Text style={itemHeaderStyles.language}>{language}</Text>
+          <Text color="white" fontSize="subheading2">
+            {language}
+          </Text>
         </View>
       </View>
     </View>
@@ -84,20 +104,15 @@ const itemFooterStyles = StyleSheet.create({
     flexGrow: 0,
     alignItems: 'center',
   },
-  actionText: {},
 });
 
 const ItemFooterBlock = ({ content, ...props }) => {
   return (
     <View style={itemFooterStyles.blockContainer} {...props}>
-      <Text
-        color="textSecondary"
-        fontWeight="bold"
-        style={itemFooterStyles.actionText}
-      >
+      <Text fontWeight="bold" fontSize="subheading2">
         {content.text}
       </Text>
-      <Text>{content.title}</Text>
+      <Text fontSize="subheading2">{content.title}</Text>
     </View>
   );
 };
@@ -112,24 +127,49 @@ const ItemFooter = ({ content }) => {
   );
 };
 
-const RepositoryItem = ({ item }) => {
+const RepositoryItem = ({ item, detailsView }) => {
+  const openLink = () => {
+    Linking.openURL(item.url);
+  };
+
+  const containerStyle = [
+    styles.container,
+    detailsView && styles.containerDetailsView,
+  ];
+
   return (
-    <View style={styles.container}>
-      <ItemHeader
-        avatarUrl={item.ownerAvatarUrl}
-        repoName={item.fullName}
-        description={item.description}
-        language={item.language}
-      />
-      <ItemFooter
-        content={[
-          { text: shortenNumber(item.stargazersCount), title: 'Stars' },
-          { text: shortenNumber(item.forksCount), title: 'Forks' },
-          { text: shortenNumber(item.reviewCount), title: 'Reviews' },
-          { text: shortenNumber(item.ratingAverage), title: 'Rating' },
-        ]}
-      />
-    </View>
+    <>
+      <View style={containerStyle}>
+        <ItemHeader
+          avatarUrl={item.ownerAvatarUrl}
+          repoName={item.fullName}
+          description={item.description}
+          language={item.language}
+        />
+        <ItemFooter
+          content={[
+            { text: shortenNumber(item.stargazersCount), title: 'Stars' },
+            { text: shortenNumber(item.forksCount), title: 'Forks' },
+            { text: shortenNumber(item.reviewCount), title: 'Reviews' },
+            { text: shortenNumber(item.ratingAverage), title: 'Rating' },
+          ]}
+        />
+        {detailsView && (
+          <View style={styles.ghButton}>
+            <TouchableWithoutFeedback onPress={openLink}>
+              <Text
+                fontWeight="bold"
+                fontSize="subheading"
+                color="white"
+                style={styles.ghButtonText}
+              >
+                Open in GitHub
+              </Text>
+            </TouchableWithoutFeedback>
+          </View>
+        )}
+      </View>
+    </>
   );
 };
 

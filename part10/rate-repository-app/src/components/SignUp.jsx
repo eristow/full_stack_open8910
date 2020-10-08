@@ -1,48 +1,68 @@
 import React from 'react';
-import * as yup from 'yup';
 import { View, TouchableWithoutFeedback } from 'react-native';
 import { Formik } from 'formik';
+import * as yup from 'yup';
 import { useHistory } from 'react-router-native';
 
-import Text from './Text';
 import FormikTextInput from './FormikTextInput';
-import { globalStyles } from '../theme';
+import Text from './Text';
+import useSignUp from '../hooks/useSignUp';
 import useSignIn from '../hooks/useSignIn';
+import { globalStyles } from '../theme';
 
 const initialValues = {
   username: '',
   password: '',
+  passwordConfirmation: '',
 };
+
+const usernameLengthErrorMessage =
+  'Username must be between 1 and 30 characters long';
+const passwordLengthErrorMessage =
+  'Password must be between 5 and 50 characters long';
 
 const validationSchema = yup.object().shape({
   username: yup
     .string()
-    .min(3, 'Username must be at least 3 characters long')
+    .min(1, usernameLengthErrorMessage)
+    .max(30, usernameLengthErrorMessage)
     .required('Username is required'),
   password: yup
     .string()
-    .min(3, 'Password must be at least 3 characters long')
+    .min(5, passwordLengthErrorMessage)
+    .max(50, passwordLengthErrorMessage)
     .required('Password is required'),
+  passwordConfirmation: yup
+    .string()
+    .oneOf(
+      [yup.ref('password'), null],
+      'Password confirmation must match password',
+    )
+    .required('Password confirmation is required'),
 });
 
-const SignInForm = ({ onSubmit }) => {
+const SignUpForm = ({ onSubmit }) => {
   return (
     <View style={globalStyles.form}>
       <FormikTextInput
         name="username"
         placeholder="Username"
         style={globalStyles.input}
-        testID="usernameField"
       />
       <FormikTextInput
         name="password"
         placeholder="Password"
         secureTextEntry
         style={globalStyles.input}
-        testID="passwordField"
+      />
+      <FormikTextInput
+        name="passwordConfirmation"
+        placeholder="Password Confirmation"
+        secureTextEntry
+        style={globalStyles.input}
       />
       <View style={globalStyles.submitButton}>
-        <TouchableWithoutFeedback onPress={onSubmit} testID="submitButton">
+        <TouchableWithoutFeedback onPress={onSubmit}>
           <Text
             color="white"
             fontWeight="bold"
@@ -57,19 +77,20 @@ const SignInForm = ({ onSubmit }) => {
   );
 };
 
-export const SignInContainer = ({ onSubmit }) => {
+export const SignUpContainer = ({ onSubmit }) => {
   return (
     <Formik
       initialValues={initialValues}
       onSubmit={onSubmit}
       validationSchema={validationSchema}
     >
-      {({ handleSubmit }) => <SignInForm onSubmit={handleSubmit} />}
+      {({ handleSubmit }) => <SignUpForm onSubmit={handleSubmit} />}
     </Formik>
   );
 };
 
-const SignIn = () => {
+const SignUp = () => {
+  const [signUp] = useSignUp();
   const [signIn] = useSignIn();
   const history = useHistory();
 
@@ -77,6 +98,7 @@ const SignIn = () => {
     const { username, password } = values;
 
     try {
+      await signUp({ username, password });
       await signIn({ username, password });
       history.push('/');
     } catch (e) {
@@ -84,7 +106,7 @@ const SignIn = () => {
     }
   };
 
-  return <SignInContainer onSubmit={onSubmit} />;
+  return <SignUpContainer onSubmit={onSubmit} />;
 };
 
-export default SignIn;
+export default SignUp;

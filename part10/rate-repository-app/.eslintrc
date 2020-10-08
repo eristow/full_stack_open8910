@@ -1,13 +1,18 @@
 {
-  "plugins": ["react"],
+  "plugins": ["react", "jest"],
   "settings": {
     "react": {
       "version": "detect"
     }
   },
-  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:jest/recommended"
+  ],
   "parser": "babel-eslint",
   "env": {
+    "jest/globals": true,
     "browser": true
   },
   "rules": {

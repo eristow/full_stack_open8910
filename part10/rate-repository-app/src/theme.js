@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 
 const theme = {
   colors: {
@@ -13,6 +13,7 @@ const theme = {
   },
   fontSizes: {
     body: 14,
+    subheading2: 16,
     subheading: 18,
   },
   fonts: {
@@ -27,5 +28,34 @@ const theme = {
     bold: '700',
   },
 };
+
+export const globalStyles = StyleSheet.create({
+  form: {
+    padding: 10,
+  },
+  input: {
+    backgroundColor: theme.colors.white,
+    marginVertical: 5,
+    padding: 15,
+    paddingHorizontal: 15,
+    borderColor: theme.colors.gray,
+    borderWidth: 2,
+    borderRadius: 5,
+    fontSize: theme.fontSizes.subheading,
+  },
+  submitButton: {
+    backgroundColor: theme.colors.primary,
+    color: theme.colors.white,
+    padding: 20,
+    marginVertical: 10,
+    borderWidth: 2,
+    borderRadius: 5,
+    borderColor: '#00000000',
+    textAlign: 'center',
+  },
+  buttonText: {
+    textAlign: 'center',
+  },
+});
 
 export default theme;
